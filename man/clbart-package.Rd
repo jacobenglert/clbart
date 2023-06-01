@@ -2,8 +2,8 @@
 % Please edit documentation in R/clbart-package.R
 \docType{package}
 \name{clbart-package}
-\alias{clbart}
 \alias{clbart-package}
+\alias{_PACKAGE}
 \title{clbart: Conditional Logistic Regression with BART}
 \description{
 Fit a Bayesian conditional logistic regression model with a single regression coefficient that is allowed to vary across the covariate space via the the Bayesian Additive Regression Trees (BART) framework.
