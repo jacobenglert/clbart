@@ -57,7 +57,7 @@ comp_mv <- function(m_start = 0, y, z, strata, sc1 = 0, lambda = 0, sigma2_mu, m
     grd <- comp_grd(y, z, sc1 + z * (m + lambda), strata, max_win, na_locs) - (m / sigma2_mu)
     I <- comp_fisher(y, z, sc1 + z * (m + lambda), strata, max_win, na_locs)  + (1 / sigma2_mu)
     if(i == 10 | is.nan(I) | is.nan(grd)){
-      m <- stats::coef(survival::clogit(y ~ offset(sc1) + offset(z * lambda) + z + strata(strata)))
+      m <- stats::coef(survival::clogit(y ~ offset(sc1) + offset(z * lambda) + z + survival::strata(strata)))
       grd <- comp_grd(y, z, sc1 + z * (m + lambda), strata, max_win, na_locs) - (m / sigma2_mu)
       I <- comp_fisher(y, z, sc1 + z * (m + lambda), strata, max_win, na_locs)  + (1 / sigma2_mu)
     }
