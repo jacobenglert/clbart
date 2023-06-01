@@ -10,8 +10,8 @@ get_max_win_and_na_locs <- function(strata){
 
 get_valid_split_rules <- function(x, n_sample = length(x), n_min){
 
-  q1 <- quantile(x, n_min / n_sample, type = 1)
-  q2 <- quantile(x, (n_sample - n_min + 1)/ n_sample, type = 1)
+  q1 <- stats::quantile(x, n_min / n_sample, type = 1)
+  q2 <- stats::quantile(x, (n_sample - n_min + 1)/ n_sample, type = 1)
 
   var_range <- sort(unique(x[x >= q1 & x < q2]))
 
@@ -20,8 +20,8 @@ get_valid_split_rules <- function(x, n_sample = length(x), n_min){
 
 get_valid_split_vars <- function(x, n_sample = nrow(x), n_min){
   valid_splits <- lapply(x, function(x0){
-    q1 <- quantile(x0, n_min / n_sample, type = 1)
-    q2 <- quantile(x0, (n_sample - n_min + 1)/ n_sample, type = 1)
+    q1 <- stats::quantile(x0, n_min / n_sample, type = 1)
+    q2 <- stats::quantile(x0, (n_sample - n_min + 1)/ n_sample, type = 1)
     if(n_min > n_sample / 2) FALSE
     else if(q1 != q2) TRUE
     else FALSE

@@ -31,13 +31,13 @@
 #' @param alpha_sigma,beta_sigma Shape and scale parameters for the inverse
 #' gamma prior on the terminal node variance.
 #'
-#' @export
 #' @examples
-#' INSERT EXAMPLE HERE
+#' 'INSERT EXAMPLE HERE'
 #'
 #' @references
 #' Chipman, H. A., George, E. I., and McCulloch, R. E. (2010). BART: Bayesian additive
 #' regression trees. The Annals of Applied Statistics, 4(1).
+#' @export
 clbart <- function(w, x = NULL, y, z, strata,
                     num_trees = 5,
                     seed = 2187,
@@ -54,7 +54,7 @@ clbart <- function(w, x = NULL, y, z, strata,
   set.seed(seed)
 
   # Drop columns of w that are only have one value
-  w_drop <- setdiff(colnames(w), colnames(Filter(\(x) var(x) > 0, w)))
+  w_drop <- setdiff(colnames(w), colnames(Filter(\(x) stats::var(x) > 0, w)))
   w_keep <- colnames(w)[which(!(colnames(w) %in% w_drop))]
   if(length(w_drop) > 0) print(paste(c('Dropping the following variables:', w_drop), collapse = ' '))
   w <- w[w_keep]
@@ -96,11 +96,11 @@ clbart <- function(w, x = NULL, y, z, strata,
     sigma2_beta_store <- numeric(K)
     beta_acc_rate     <- numeric(K)
 
-    m0 <- clogit(y ~ x + z + strata(strata))
-    beta <- coef(m0)[1:p]
-    mu_start <- coef(m0)[p+1]
-    beta_cov <- vcov(m0)[1:p, 1:p]
-    sigma2_mu <- coef(m0)[p+1] * 1e10
+    m0 <- survival::clogit(y ~ x + z + strata(strata))
+    beta <- stats::coef(m0)[1:p]
+    mu_start <- stats::coef(m0)[p+1]
+    beta_cov <- stats::vcov(m0)[1:p, 1:p]
+    sigma2_mu <- stats::coef(m0)[p+1] * 1e10
     xbeta <- x %*% beta
   }
   else{
@@ -111,9 +111,9 @@ clbart <- function(w, x = NULL, y, z, strata,
     sigma2_beta <- NULL
     beta_acc_prob <- NULL
 
-    m0 <- clogit(y ~ z + strata(strata))
-    mu_start <- coef(m0)
-    sigma2_mu <- coef(m0) * 1e10
+    m0 <- survival::clogit(y ~ z + strata(strata))
+    mu_start <- stats::coef(m0)
+    sigma2_mu <- stats::coef(m0) * 1e10
     xbeta <- numeric(length(y))
   }
 
@@ -160,7 +160,7 @@ clbart <- function(w, x = NULL, y, z, strata,
       r <- min(0, ll_prop + lp_prop - ll_curr - lp_curr)
 
       # Update beta vector (or not)
-      if(log(runif(1)) < r) {
+      if(log(stats::runif(1)) < r) {
         beta <- beta_prop
         xbeta <- x %*% beta
         n_acc_beta <- n_acc_beta + 1
@@ -226,8 +226,8 @@ clbart <- function(w, x = NULL, y, z, strata,
         prop_logLik <- sum(unlist(lapply(l_children, '[[', 'logLik')))
 
         # Proposal distribution priors
-        g_prune <- dnorm(l$mu, l$m, l$v, log = TRUE)
-        g_grow <- sum(unlist(lapply(l_children, \(l) dnorm(l$mu, l$m, l$v, log = TRUE))))
+        g_prune <- stats::dnorm(l$mu, l$m, l$v, log = TRUE)
+        g_grow <- sum(unlist(lapply(l_children, \(l) stats::dnorm(l$mu, l$m, l$v, log = TRUE))))
 
         # Split priors
         curr_rho <- p_split(d = l$depth, alpha = alpha_rho, beta = beta_rho)
@@ -261,8 +261,8 @@ clbart <- function(w, x = NULL, y, z, strata,
         prop_logLik <- b$logLik
 
         # Proposal distribution priors
-        g_grow <- sum(unlist(lapply(b_children, \(l) dnorm(l$mu, l$m, l$v, log = TRUE))))
-        g_prune <- dnorm(b$mu, b$m, b$v, log = TRUE)
+        g_grow <- sum(unlist(lapply(b_children, \(l) stats::dnorm(l$mu, l$m, l$v, log = TRUE))))
+        g_prune <- stats::dnorm(b$mu, b$m, b$v, log = TRUE)
 
         # Split priors
         curr_rho <- p_split(d = b$depth + 1, alpha = alpha_rho, beta = beta_rho)
@@ -294,8 +294,8 @@ clbart <- function(w, x = NULL, y, z, strata,
         prop_logLik <- sum(unlist(lapply(prop_b_children, '[[', 'logLik')))
 
         # Compute the log-likelihood of the proposal
-        curr_g_change <- sum(unlist(lapply(curr_b_children, \(l) dnorm(l$mu, l$m, l$v, log = TRUE))))
-        prop_g_change <- sum(unlist(lapply(prop_b_children, \(l) dnorm(l$mu, l$m, l$v, log = TRUE))))
+        curr_g_change <- sum(unlist(lapply(curr_b_children, \(l) stats::dnorm(l$mu, l$m, l$v, log = TRUE))))
+        prop_g_change <- sum(unlist(lapply(prop_b_children, \(l) stats::dnorm(l$mu, l$m, l$v, log = TRUE))))
 
         # Calculate the M-H acceptance ratio on the log scale
         r <- min(prop_logLik - curr_logLik + curr_g_change - prop_g_change, 0)
@@ -303,7 +303,7 @@ clbart <- function(w, x = NULL, y, z, strata,
         nodes_to_update <- b_children_idx
       }
 
-      if(log(runif(1)) < r){
+      if(log(stats::runif(1)) < r){
         forest[[j]] <- prop_tree
         n_acc_tree <- n_acc_tree + 1
       }

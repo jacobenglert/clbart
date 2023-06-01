@@ -19,7 +19,7 @@ plant <- function(w, y, z, strata, sc1 = numeric(length(y)), lambda = numeric(le
                               max_win = root$max_win, na_locs = root$na_locs)
 
   # Sample mu for the root node and update the log-likelihood
-  root['mu'] <- rnorm(1, root$m, root$v)
+  root['mu'] <- stats::rnorm(1, root$m, root$v)
   root['logLik'] <- comp_loglik(y, sc = sc1 + z * (lambda + root$mu), strata,
                                 max_win = root$max_win, na_locs = root$na_locs)
 
@@ -70,7 +70,7 @@ grow <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = numer
                                  max_win = child$max_win,
                                  na_locs = child$na_locs)
 
-    child['mu'] <- rnorm(1, child$m, child$v)
+    child['mu'] <- stats::rnorm(1, child$m, child$v)
     child['logLik'] <- comp_loglik(y = y[child$data_idx],
                                    sc = (sc1 + z * (lambda + child$mu))[child$data_idx],
                                    strata = strata[child$data_idx],
@@ -113,7 +113,7 @@ prune <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = nume
                            max_win = b$max_win,
                            na_locs = b$na_locs)
 
-  b['mu'] <- rnorm(1, b$m, b$v)
+  b['mu'] <- stats::rnorm(1, b$m, b$v)
   b['logLik'] <- comp_loglik(y = y[b$data_idx],
                              sc = (sc1 + z * (lambda + b$mu))[b$data_idx],
                              strata = strata[b$data_idx],
@@ -167,7 +167,7 @@ change <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = num
                                  max_win = child$max_win,
                                  na_locs = child$na_locs)
 
-    child['mu'] <- rnorm(1, child$m, child$v)
+    child['mu'] <- stats::rnorm(1, child$m, child$v)
     child['logLik'] <- comp_loglik(y = y[child$data_idx],
                                    sc = (sc1 + z * (lambda + child$mu))[child$data_idx],
                                    strata = strata[child$data_idx],

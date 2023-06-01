@@ -80,7 +80,7 @@ gamma prior on the terminal node variance.}
 Estimate Heterogeneous Effects with Conditional Logistic Regression
 }
 \examples{
-INSERT EXAMPLE HERE
+'INSERT EXAMPLE HERE'
 
 }
 \references{
