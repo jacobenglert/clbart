@@ -2,3 +2,6 @@
 
 export(clbart)
 export(str_split_one)
+importFrom(survival,Surv)
+importFrom(survival,coxph)
+importFrom(survival,strata)

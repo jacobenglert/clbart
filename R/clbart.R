@@ -37,6 +37,7 @@
 #' @references
 #' Chipman, H. A., George, E. I., and McCulloch, R. E. (2010). BART: Bayesian additive
 #' regression trees. The Annals of Applied Statistics, 4(1).
+#' @importFrom survival coxph
 #' @export
 clbart <- function(w, x = NULL, y, z, strata,
                     num_trees = 5,
