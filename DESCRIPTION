@@ -1,10 +1,12 @@
 Package: clbart
-Title: Conditional Logistic Regression With BART
+Title: Conditional Logistic Regression with BART
 Version: 0.0.0.9000
 Authors@R: 
     person("Jacob", "Englert", , "jacobenglert@outlook.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5416-3604"))
-Description: Fit a Bayesian conditional logistic regression model with a single regression coefficient that is allowed to vary across the covariate space via the the Bayesian Additive Regression Trees (BART) framework.
+Description: Fit a Bayesian conditional logistic regression model with a single 
+    regression coefficient that is allowed to vary across the covariate space 
+    via the the Bayesian Additive Regression Trees (BART) framework.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
