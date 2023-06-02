@@ -97,7 +97,7 @@ clbart <- function(w, x = NULL, y, z, strata,
     sigma2_beta_store <- numeric(K)
     beta_acc_rate     <- numeric(K)
 
-    m0 <- survival::clogit(y ~ x + z + survival::strata(strata))
+    m0 <- clogit(y ~ x + z + strata(strata))
     beta <- stats::coef(m0)[1:p]
     mu_start <- stats::coef(m0)[p+1]
     beta_cov <- stats::vcov(m0)[1:p, 1:p]
@@ -112,7 +112,7 @@ clbart <- function(w, x = NULL, y, z, strata,
     sigma2_beta <- NULL
     beta_acc_prob <- NULL
 
-    m0 <- survival::clogit(y ~ z + survival::strata(strata))
+    m0 <- clogit(y ~ z + strata(strata))
     mu_start <- stats::coef(m0)
     sigma2_mu <- stats::coef(m0) * 1e10
     xbeta <- numeric(length(y))
