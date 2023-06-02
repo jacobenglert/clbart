@@ -6,5 +6,6 @@
 #' @importFrom survival coxph
 #' @importFrom survival strata
 #' @importFrom survival Surv
+#' @import survival
 ## usethis namespace: end
 NULL
