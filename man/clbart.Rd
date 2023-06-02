@@ -9,7 +9,7 @@ clbart(
   x = NULL,
   y,
   z,
-  strata,
+  stratum,
   num_trees = 5,
   seed = 2187,
   iter = 10000,
@@ -37,7 +37,7 @@ clbart(
 \item{z}{A numeric vector corresponding to the primary treatment or exposure
 of interest. May be continuous or binary.}
 
-\item{strata}{A vector indicating the strata each observation belongs to.}
+\item{stratum}{A vector indicating the strata each observation belongs to.}
 
 \item{num_trees}{integer number of trees to include in the BART portion of
 the model}

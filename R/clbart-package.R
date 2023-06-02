@@ -3,5 +3,6 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @import survival
 ## usethis namespace: end
 NULL

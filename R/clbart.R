@@ -5,7 +5,7 @@
 #' @param y A numeric vector of 1's and 0's corresponding to the outcome
 #' @param z A numeric vector corresponding to the primary treatment or exposure
 #' of interest. May be continuous or binary.
-#' @param strata A vector indicating the strata each observation belongs to.
+#' @param stratum A vector indicating the strata each observation belongs to.
 #' @param num_trees integer number of trees to include in the BART portion of
 #' the model
 #' @param seed A random seed to initiate the algorithm with.
@@ -38,7 +38,7 @@
 #' Chipman, H. A., George, E. I., and McCulloch, R. E. (2010). BART: Bayesian additive
 #' regression trees. The Annals of Applied Statistics, 4(1).
 #' @export
-clbart <- function(w, x = NULL, y, z, strata,
+clbart <- function(w, x = NULL, y, z, stratum,
                     num_trees = 5,
                     seed = 2187,
                     iter = 1e4, thin = 1, warmup = floor(iter / 2),
@@ -60,14 +60,14 @@ clbart <- function(w, x = NULL, y, z, strata,
   w <- w[w_keep]
 
   # Number of strata and confounders
-  strata <- as.numeric(as.factor(strata))
-  firsts <- match(unique(strata), strata)
-  n <- length(unique(strata))
+  stratum <- as.numeric(as.factor(stratum))
+  firsts <- match(unique(stratum), stratum)
+  n <- length(unique(stratum))
 
   # Parameters needed to accelerate computation of log-likelihood on the entire dataset
-  windows <- table(strata)
+  windows <- table(stratum)
   max_win <- max(windows)
-  na_locs <- (1:(max_win * n)) %in% (max_win * unique(strata)[which(windows != max_win)]) |>
+  na_locs <- (1:(max_win * n)) %in% (max_win * unique(stratum)[which(windows != max_win)]) |>
     matrix(nrow = max_win, ncol = n)
 
   # Set up storage for MCMC results
@@ -96,7 +96,7 @@ clbart <- function(w, x = NULL, y, z, strata,
     sigma2_beta_store <- numeric(K)
     beta_acc_rate     <- numeric(K)
 
-    m0 <- survival:clogit(y ~ x + z + survival::strata(strata))
+    m0 <- clogit(y ~ x + z + strata(stratum))
     beta <- stats::coef(m0)[1:p]
     mu_start <- stats::coef(m0)[p+1]
     beta_cov <- stats::vcov(m0)[1:p, 1:p]
@@ -111,7 +111,7 @@ clbart <- function(w, x = NULL, y, z, strata,
     sigma2_beta <- NULL
     beta_acc_prob <- NULL
 
-    m0 <- survival::clogit(y ~ z + survival::strata(strata))
+    m0 <- clogit(y ~ z + strata(stratum))
     mu_start <- stats::coef(m0)
     sigma2_mu <- stats::coef(m0) * 1e10
     xbeta <- numeric(length(y))
@@ -122,7 +122,7 @@ clbart <- function(w, x = NULL, y, z, strata,
 
   forest <- list()
   for(j in 1:num_trees){
-    forest[[j]] <- plant(w, y, z, sc1 = xbeta, strata, lambda, sigma2_mu, m_start = mu_start)
+    forest[[j]] <- plant(w, y, z, sc1 = xbeta, stratum, lambda, sigma2_mu, m_start = mu_start)
     lambda <- lambda + predict_tree(forest[[j]])
   }
 
@@ -149,8 +149,8 @@ clbart <- function(w, x = NULL, y, z, strata,
       beta_prop <- as.numeric(MASS::mvrnorm(1, beta, sigma2_beta * beta_cov))
 
       # Log-likelihoods (proposal and current)
-      ll_curr <- comp_loglik(y = y, sc = x %*% beta_curr + lambda, strata = strata, max_win = max_win, na_locs = na_locs)
-      ll_prop <- comp_loglik(y = y, sc = x %*% beta_prop + lambda, strata = strata, max_win = max_win, na_locs = na_locs)
+      ll_curr <- comp_loglik(y = y, sc = x %*% beta_curr + lambda, strata = stratum, max_win = max_win, na_locs = na_locs)
+      ll_prop <- comp_loglik(y = y, sc = x %*% beta_prop + lambda, strata = stratum, max_win = max_win, na_locs = na_locs)
 
       # Log-priors (proposal and current)
       lp_curr <- mvtnorm::dmvnorm(beta_curr, sigma = 1e10 * diag(p), log = TRUE)
@@ -210,7 +210,7 @@ clbart <- function(w, x = NULL, y, z, strata,
       if(move == 'grow'){
 
         # Propose move
-        prop_tree <- grow(curr_tree, w, y, z, strata, sc1 = xbeta, lambda, sigma2_mu, n_min)
+        prop_tree <- grow(curr_tree, w, y, z, stratum, sc1 = xbeta, lambda, sigma2_mu, n_min)
         p_grow2 <- ifelse(is_growable(prop_tree), move_probs[1], 0)
         p_change2 <- ifelse(is_changeable(prop_tree), move_probs[3], 0)
         p_prune2 <- p_prune / sum(p_grow2, p_change2, p_prune)
@@ -245,7 +245,7 @@ clbart <- function(w, x = NULL, y, z, strata,
       else if(move == 'prune'){
 
         # Propose move
-        prop_tree <- prune(curr_tree, w, y, z, strata, sc1 = xbeta, lambda, sigma2_mu, n_min)
+        prop_tree <- prune(curr_tree, w, y, z, stratum, sc1 = xbeta, lambda, sigma2_mu, n_min)
         p_grow <- ifelse(is_growable(curr_tree), move_probs[1], 0)
         p_change <- ifelse(is_changeable(curr_tree), move_probs[3], 0)
         p_grow2 <- p_grow2 / sum(p_grow2, p_change2, p_prune)
@@ -280,7 +280,7 @@ clbart <- function(w, x = NULL, y, z, strata,
       else if(move == 'change'){
 
         # Propose move
-        prop_tree <- change(curr_tree, w, y, z, strata, sc1 = xbeta, lambda, sigma2_mu, n_min)
+        prop_tree <- change(curr_tree, w, y, z, stratum, sc1 = xbeta, lambda, sigma2_mu, n_min)
 
         # Current and proposed nodes
         b_children_idx <- which(mapply(\(x, y) x != y,
@@ -308,7 +308,7 @@ clbart <- function(w, x = NULL, y, z, strata,
         n_acc_tree <- n_acc_tree + 1
       }
 
-      forest[[j]] <- update_mu(forest[[j]], y, z, strata, xbeta, lambda, sigma2_mu)
+      forest[[j]] <- update_mu(forest[[j]], y, z, stratum, xbeta, lambda, sigma2_mu)
 
       lambda <- lambda + predict_tree(forest[[j]])
     }
@@ -340,7 +340,7 @@ clbart <- function(w, x = NULL, y, z, strata,
       avg_tree_depth[Kk]      <- get_avg_tree_depth(forest)
 
       # WAIC
-      ll_curr <- comp_loglik(y = y, sc = xbeta + (lambda * z), strata = strata, max_win = max_win, na_locs = na_locs, sum = FALSE)
+      ll_curr <- comp_loglik(y = y, sc = xbeta + (lambda * z), strata = stratum, max_win = max_win, na_locs = na_locs, sum = FALSE)
       ll <- ll + ll_curr
       ll2 <- ll2 + ll_curr^2
       ell <- ell + exp(ll_curr)
