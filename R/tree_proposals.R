@@ -1,26 +1,26 @@
 
-plant <- function(w, y, z, strata, sc1 = numeric(length(y)), lambda = numeric(length(y)), sigma2_mu, m_start = 0){
+plant <- function(w, y, z, stratum, sc1 = numeric(length(y)), lambda = numeric(length(y)), sigma2_mu, m_start = 0){
 
   # Instantiate tree
   nodes <- list()
 
   # Instantiate root node (depth 0, is a leaf, not a grandparent)
   data_idx <- rep(TRUE, length(y))
-  data_idx_first <- data_idx & (1:length(y) %in% match(unique(strata), strata))
+  data_idx_first <- data_idx & (1:length(y) %in% match(unique(stratum), stratum))
 
   root <- list(depth = 0, leaf = 1, nog = 0,
                data_idx = data_idx,
                data_idx_first = data_idx_first,
                split_var = NULL, split_rule = NULL)
-  root[c('n','max_win','na_locs')] <- get_max_win_and_na_locs(strata)
+  root[c('n','max_win','na_locs')] <- get_max_win_and_na_locs(stratum)
 
   # Compute m and v for the root node
-  root[c('m','v')] <- comp_mv(m_start, y, z, strata, sc1, lambda, sigma2_mu,
+  root[c('m','v')] <- comp_mv(m_start, y, z, stratum, sc1, lambda, sigma2_mu,
                               max_win = root$max_win, na_locs = root$na_locs)
 
   # Sample mu for the root node and update the log-likelihood
   root['mu'] <- stats::rnorm(1, root$m, root$v)
-  root['logLik'] <- comp_loglik(y, sc = sc1 + z * (lambda + root$mu), strata,
+  root['logLik'] <- comp_loglik(y, sc = sc1 + z * (lambda + root$mu), stratum,
                                 max_win = root$max_win, na_locs = root$na_locs)
 
   nodes[[1]] <- root
@@ -31,7 +31,7 @@ plant <- function(w, y, z, strata, sc1 = numeric(length(y)), lambda = numeric(le
               valid_change_nodes = numeric(0), valid_change_vars = list()))
 }
 
-grow <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = numeric(length(y)), sigma2_mu, n_min = 1){
+grow <- function(tree, w, y, z, stratum, sc1 = numeric(length(y)), lambda = numeric(length(y)), sigma2_mu, n_min = 1){
 
   stopifnot("Cannot grow additional leaves due to lack of available splits" = length(tree$valid_grow_nodes) != 0)
 
@@ -54,16 +54,16 @@ grow <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = numer
 
     idx <- l_children[i]
 
-    data_idx_first <- child_data_idx[[i]] & (1:length(strata) %in% match(unique(strata), strata))
+    data_idx_first <- child_data_idx[[i]] & (1:length(stratum) %in% match(unique(stratum), stratum))
 
     child <- list(depth = l$depth + 1, leaf = 1, nog = 0,
                   data_idx = child_data_idx[[i]],
                   data_idx_first = data_idx_first)
-    child[c('n','max_win','na_locs')] <- get_max_win_and_na_locs(strata[child$data_idx])
+    child[c('n','max_win','na_locs')] <- get_max_win_and_na_locs(stratum[child$data_idx])
     child[c('m','v')] <- comp_mv(m_start = l$m,
                                  y = y[child$data_idx],
                                  z = z[child$data_idx],
-                                 strata = strata[child$data_idx],
+                                 stratum = stratum[child$data_idx],
                                  sc1 = sc1[child$data_idx],
                                  lambda = lambda[child$data_idx],
                                  sigma2_mu = sigma2_mu,
@@ -73,7 +73,7 @@ grow <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = numer
     child['mu'] <- stats::rnorm(1, child$m, child$v)
     child['logLik'] <- comp_loglik(y = y[child$data_idx],
                                    sc = (sc1 + z * (lambda + child$mu))[child$data_idx],
-                                   strata = strata[child$data_idx],
+                                   stratum = stratum[child$data_idx],
                                    max_win = child$max_win,
                                    na_locs = child$na_locs)
 
@@ -90,7 +90,7 @@ grow <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = numer
   return(tree)
 }
 
-prune <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = numeric(length(y)), sigma2_mu, n_min = 1){
+prune <- function(tree, w, y, z, stratum, sc1 = numeric(length(y)), lambda = numeric(length(y)), sigma2_mu, n_min = 1){
 
   stopifnot("Cannot prune a tree that only contains the root node" = tree$num_nodes != 1)
 
@@ -106,7 +106,7 @@ prune <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = nume
   b[c('m','v')] <- comp_mv(m_start = sum(unlist(lapply(tree$nodes[get_children(b_idx)], \(l) l$n * l$m))) / b$n,
                            y = y[b$data_idx],
                            z = z[b$data_idx],
-                           strata = strata[b$data_idx],
+                           stratum = stratum[b$data_idx],
                            sc1 = sc1[b$data_idx],
                            lambda = lambda[b$data_idx],
                            sigma2_mu = sigma2_mu,
@@ -116,7 +116,7 @@ prune <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = nume
   b['mu'] <- stats::rnorm(1, b$m, b$v)
   b['logLik'] <- comp_loglik(y = y[b$data_idx],
                              sc = (sc1 + z * (lambda + b$mu))[b$data_idx],
-                             strata = strata[b$data_idx],
+                             stratum = stratum[b$data_idx],
                              max_win = b$max_win,
                              na_locs = b$na_locs)
 
@@ -131,7 +131,7 @@ prune <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = nume
   return(tree)
 }
 
-change <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = numeric(length(y)), sigma2_mu, n_min = 1){
+change <- function(tree, w, y, z, stratum, sc1 = numeric(length(y)), lambda = numeric(length(y)), sigma2_mu, n_min = 1){
 
   stopifnot("Cannot change a tree that only contains the root node" = tree$num_nodes != 1)
 
@@ -151,16 +151,16 @@ change <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = num
   for(i in 1:2){
 
     idx <- b_children[i]
-    data_idx_first <- child_data_idx[[i]] & (1:length(strata) %in% match(unique(strata), strata))
+    data_idx_first <- child_data_idx[[i]] & (1:length(stratum) %in% match(unique(stratum), stratum))
 
     child <- list(depth = b$depth + 1, leaf = 1, nog = 0,
                   data_idx = child_data_idx[[i]],
                   data_idx_first = data_idx_first)
-    child[c('n','max_win','na_locs')] <- get_max_win_and_na_locs(strata[child$data_idx])
+    child[c('n','max_win','na_locs')] <- get_max_win_and_na_locs(stratum[child$data_idx])
     child[c('m','v')] <- comp_mv(m_start = b$m,
                                  y = y[child$data_idx],
                                  z = z[child$data_idx],
-                                 strata = strata[child$data_idx],
+                                 stratum = stratum[child$data_idx],
                                  sc1 = sc1[child$data_idx],
                                  lambda = lambda[child$data_idx],
                                  sigma2_mu = sigma2_mu,
@@ -170,7 +170,7 @@ change <- function(tree, w, y, z, strata, sc1 = numeric(length(y)), lambda = num
     child['mu'] <- stats::rnorm(1, child$m, child$v)
     child['logLik'] <- comp_loglik(y = y[child$data_idx],
                                    sc = (sc1 + z * (lambda + child$mu))[child$data_idx],
-                                   strata = strata[child$data_idx],
+                                   stratum = stratum[child$data_idx],
                                    max_win = child$max_win,
                                    na_locs = child$na_locs)
 

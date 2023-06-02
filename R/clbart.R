@@ -149,8 +149,8 @@ clbart <- function(w, x = NULL, y, z, stratum,
       beta_prop <- as.numeric(MASS::mvrnorm(1, beta, sigma2_beta * beta_cov))
 
       # Log-likelihoods (proposal and current)
-      ll_curr <- comp_loglik(y = y, sc = x %*% beta_curr + lambda, strata = stratum, max_win = max_win, na_locs = na_locs)
-      ll_prop <- comp_loglik(y = y, sc = x %*% beta_prop + lambda, strata = stratum, max_win = max_win, na_locs = na_locs)
+      ll_curr <- comp_loglik(y = y, sc = x %*% beta_curr + lambda, stratum = stratum, max_win = max_win, na_locs = na_locs)
+      ll_prop <- comp_loglik(y = y, sc = x %*% beta_prop + lambda, stratum = stratum, max_win = max_win, na_locs = na_locs)
 
       # Log-priors (proposal and current)
       lp_curr <- mvtnorm::dmvnorm(beta_curr, sigma = 1e10 * diag(p), log = TRUE)
@@ -340,7 +340,7 @@ clbart <- function(w, x = NULL, y, z, stratum,
       avg_tree_depth[Kk]      <- get_avg_tree_depth(forest)
 
       # WAIC
-      ll_curr <- comp_loglik(y = y, sc = xbeta + (lambda * z), strata = stratum, max_win = max_win, na_locs = na_locs, sum = FALSE)
+      ll_curr <- comp_loglik(y = y, sc = xbeta + (lambda * z), stratum = stratum, max_win = max_win, na_locs = na_locs, sum = FALSE)
       ll <- ll + ll_curr
       ll2 <- ll2 + ll_curr^2
       ell <- ell + exp(ll_curr)

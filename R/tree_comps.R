@@ -1,5 +1,5 @@
 # Compute the CLR data log-likelihood for a given node
-comp_loglik <- function(y, sc, strata, max_win, na_locs, sum = TRUE){
+comp_loglik <- function(y, sc, stratum, max_win, na_locs, sum = TRUE){
 
   denoms <- NA * na_locs
   denoms[!na_locs] <- sc
@@ -10,7 +10,7 @@ comp_loglik <- function(y, sc, strata, max_win, na_locs, sum = TRUE){
 }
 
 # Compute the gradient of the CLR likelihood for a given node
-comp_grd <- function(y, z, sc, strata, max_win, na_locs){
+comp_grd <- function(y, z, sc, stratum, max_win, na_locs){
 
   nums <- denoms <- NA * na_locs
   nums[!na_locs] <- z * exp(sc)
@@ -25,7 +25,7 @@ comp_grd <- function(y, z, sc, strata, max_win, na_locs){
 }
 
 # Compute Fisher's information of the CLR likelihood for a given node
-comp_fisher <- function(y, z, sc, strata, max_win, na_locs){
+comp_fisher <- function(y, z, sc, stratum, max_win, na_locs){
 
   a <- b <- c <- NA * na_locs
 
@@ -43,23 +43,23 @@ comp_fisher <- function(y, z, sc, strata, max_win, na_locs){
 }
 
 # comp_mv (compute the mean and variance for the proposal distribution)
-comp_mv <- function(m_start = 0, y, z, strata, sc1 = 0, lambda = 0, sigma2_mu, max_win, na_locs){
+comp_mv <- function(m_start = 0, y, z, stratum, sc1 = 0, lambda = 0, sigma2_mu, max_win, na_locs){
 
   m <- m_start
 
   # Use Fisher scoring to update m and v
-  grd <- comp_grd(y, z, sc = sc1 + z * (m + lambda), strata, max_win, na_locs) - (m / sigma2_mu)
-  I <- comp_fisher(y, z, sc = sc1 + z * (m + lambda), strata, max_win, na_locs) + (1 / sigma2_mu)
+  grd <- comp_grd(y, z, sc = sc1 + z * (m + lambda), stratum, max_win, na_locs) - (m / sigma2_mu)
+  I <- comp_fisher(y, z, sc = sc1 + z * (m + lambda), stratum, max_win, na_locs) + (1 / sigma2_mu)
 
   i <- 0
   while(abs(grd) > sqrt(I)/10){
     m <- m + (grd / I)
-    grd <- comp_grd(y, z, sc1 + z * (m + lambda), strata, max_win, na_locs) - (m / sigma2_mu)
-    I <- comp_fisher(y, z, sc1 + z * (m + lambda), strata, max_win, na_locs)  + (1 / sigma2_mu)
+    grd <- comp_grd(y, z, sc1 + z * (m + lambda), stratum, max_win, na_locs) - (m / sigma2_mu)
+    I <- comp_fisher(y, z, sc1 + z * (m + lambda), stratum, max_win, na_locs)  + (1 / sigma2_mu)
     if(i == 10 | is.nan(I) | is.nan(grd)){
-      m <- stats::coef(survival::clogit(y ~ offset(sc1) + offset(z * lambda) + z + survival::strata(strata)))
-      grd <- comp_grd(y, z, sc1 + z * (m + lambda), strata, max_win, na_locs) - (m / sigma2_mu)
-      I <- comp_fisher(y, z, sc1 + z * (m + lambda), strata, max_win, na_locs)  + (1 / sigma2_mu)
+      m <- stats::coef(survival::clogit(y ~ offset(sc1) + offset(z * lambda) + z + survival::strata(stratum)))
+      grd <- comp_grd(y, z, sc1 + z * (m + lambda), stratum, max_win, na_locs) - (m / sigma2_mu)
+      I <- comp_fisher(y, z, sc1 + z * (m + lambda), stratum, max_win, na_locs)  + (1 / sigma2_mu)
     }
     i <- i + 1
   }

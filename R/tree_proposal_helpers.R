@@ -1,9 +1,9 @@
-get_max_win_and_na_locs <- function(strata){
-  strata <- as.numeric(as.factor(strata))
-  n <- length(unique(strata))
-  windows <- table(strata)
+get_max_win_and_na_locs <- function(stratum){
+  stratum <- as.numeric(as.factor(stratum))
+  n <- length(unique(stratum))
+  windows <- table(stratum)
   max_win <- max(windows)
-  na_locs <- (1:(max_win * n)) %in% (max_win * unique(strata)[which(windows != max_win)]) |>
+  na_locs <- (1:(max_win * n)) %in% (max_win * unique(stratum)[which(windows != max_win)]) |>
     matrix(nrow = max_win, ncol = n)
   return(list(n = n, max_win = max_win, na_locs = na_locs))
 }
