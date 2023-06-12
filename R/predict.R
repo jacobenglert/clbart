@@ -23,6 +23,19 @@ predict_tree <- function(tree = NULL, new_data = NULL){
   }
 }
 
+#' Obtain predictions of heterogeneous log-odds ratios from a posterior forest
+#' within a `clbart` model fit.
+#'
+#' @param forest list of trees (part of a `clbart` model posterior)
+#' @param new_data data frame for which to obtain predictions (should match the
+#' format of the moderating covarite data frame `w` in the initial `clbart()`
+#' call)
+#'
+#' @return a numeric vector of predicted log-odds ratios
+#' @export
+#'
+#' @examples
+#' 'INSERT EXAMPLE HERE'
 predict_forest <- function(forest = NULL, new_data = NULL){
   return(Reduce('+', lapply(forest, \(t) predict_tree(t, new_data))))
 }
