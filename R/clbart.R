@@ -96,11 +96,11 @@ clbart <- function(w, x = NULL, y, z, stratum,
     sigma2_beta_store <- numeric(K)
     beta_acc_rate     <- numeric(K)
 
-    m0 <- clogit(y ~ x + z + strata(stratum))
-    beta <- stats::coef(m0)[1:p]
-    mu_start <- stats::coef(m0)[p+1]
-    beta_cov <- stats::vcov(m0)[1:p, 1:p]
-    sigma2_mu <- stats::coef(m0)[p+1] * 1e10
+    m0 <- clr(y, cbind(x, z), stratum) # clogit(y ~ x + z + strata(stratum))
+    beta <- m0$beta[1:p] # stats::coef(m0)[1:p]
+    mu_start <- m0$beta[p+1] # stats::coef(m0)[p+1]
+    beta_cov <- m0$vcov[1:p, 1:p] # stats::vcov(m0)[1:p, 1:p]
+    sigma2_mu <- m0$beta[p+1] * 1e10 # stats::coef(m0)[p+1] * 1e10
     xbeta <- x %*% beta
   }
   else{
@@ -111,9 +111,9 @@ clbart <- function(w, x = NULL, y, z, stratum,
     sigma2_beta <- NULL
     beta_acc_prob <- NULL
 
-    m0 <- clogit(y ~ z + strata(stratum))
-    mu_start <- stats::coef(m0)
-    sigma2_mu <- stats::coef(m0) * 1e10
+    m0 <- clr(y, matrix(z, ncol = 1), stratum) # clogit(y ~ z + strata(stratum))
+    mu_start <- m0$beta
+    sigma2_mu <- m0$beta * 1e10
     xbeta <- numeric(length(y))
   }
 
