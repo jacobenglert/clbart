@@ -192,18 +192,22 @@ clbart <- function(w, x = NULL, y, z, stratum,
       # Subtract the current tree's contribution
       lambda <- lambda - predict_tree(curr_tree)
 
-      p_prune <- move_probs[2]
       if(curr_tree$num_nodes == 1){
         move <- 'grow'
         p_grow <- 1
+        p_prune <- 0
+        p_change <- 0
       }
       else{
         p_grow <- ifelse(is_growable(curr_tree), move_probs[1], 0)
+        p_prune <- move_probs[2]
         p_change <- ifelse(is_changeable(curr_tree), move_probs[3], 0)
 
-        p_grow <- p_grow / sum(p_grow, p_change, p_prune)
-        p_change <- p_change / sum(p_grow, p_change, p_prune)
-        p_prune <- 1 - p_grow - p_change
+        p_all <- sum(p_grow, p_prune, p_change)
+        p_grow <- p_grow / p_all
+        p_prune <- p_prune / p_all
+        p_change <- p_change / p_all
+
         move <- sample(moves, 1, prob = c(p_grow, p_prune, p_change))
       }
 
@@ -212,8 +216,13 @@ clbart <- function(w, x = NULL, y, z, stratum,
         # Propose move
         prop_tree <- grow(curr_tree, w, y, z, stratum, sc1 = xbeta, lambda, sigma2_mu, n_min)
         p_grow2 <- ifelse(is_growable(prop_tree), move_probs[1], 0)
+        p_prune2 <- move_probs[2]
         p_change2 <- ifelse(is_changeable(prop_tree), move_probs[3], 0)
-        p_prune2 <- p_prune / sum(p_grow2, p_change2, p_prune)
+
+        p_all2 <- sum(p_grow2, p_prune2, p_change2)
+        p_grow2 <- p_grow2 / p_all2
+        p_prune2 <- p_prune2 / p_all2
+        p_change2 <- p_change2 / p_all2
 
         # Current and proposed nodes
         l_children_idx <- setdiff(prop_tree$node_idx, curr_tree$node_idx)
@@ -246,9 +255,14 @@ clbart <- function(w, x = NULL, y, z, stratum,
 
         # Propose move
         prop_tree <- prune(curr_tree, w, y, z, stratum, sc1 = xbeta, lambda, sigma2_mu, n_min)
-        p_grow <- ifelse(is_growable(curr_tree), move_probs[1], 0)
-        p_change <- ifelse(is_changeable(curr_tree), move_probs[3], 0)
-        p_grow2 <- p_grow2 / sum(p_grow2, p_change2, p_prune)
+        p_grow2 <- move_probs[1]
+        p_prune2 <- ifelse(prop_tree$num_nodes != 1, move_probs[2], 0)
+        p_change2 <- ifelse(is_changeable(prop_tree), move_probs[3], 0)
+
+        p_all2 <- sum(p_grow2, p_change2, p_prune2)
+        p_grow2 <- p_grow2 / p_all2
+        p_prune2 <- p_prune2 / p_all2
+        p_change2 <- p_change2 / p_all2
 
         # Current and proposed nodes
         b_children_idx <- setdiff(curr_tree$node_idx, prop_tree$node_idx)
