@@ -76,8 +76,46 @@ in Chipman et al. (2010).}
 \item{alpha_sigma, beta_sigma}{Shape and scale parameters for the inverse
 gamma prior on the terminal node variance.}
 }
+\value{
+\code{clbart} returns a list of elements of the posterior distribution
+generated during the fitting process. The number of posterior samples is
+K = \code{(iter - warmup) / thin}.
+\item{beta}{A K x \code{ncol(x)} matrix.}
+\item{sigma2_beta}{A length K vector (typically one value, since sigma2_beta
+is only updated during the warmup period).}
+\item{beta_acc_rate}{A length K vector of the cumulative M-H acceptance rate
+for the entire \code{beta} vector.}
+\item{forests}{A length K list of lists. Each internal list represents an
+individual tree within the ensemble, represented by a list of nodes within
+within that tree for the given iteration. Each node is represented as a list
+containing: \code{leaf} (indicates whether the node is a leaf node), \code{split_rule}
+(indicating the variable and cut-point defining the node), and \code{mu}
+(the prediction for the node).}
+\item{tree_acc_rate}{A length K vector of the proportion of tree proposals
+accepted out of \code{num_trees} within each iteration.}
+\item{sigma2_mu}{A length K vector of the variance parameter placed on the
+Normal leaf node prior.}
+\item{split_props}{A K x \code{ncol(w)} matrix containing the distribution of
+all splits in the ensemble across the variables in \code{w} at each iteration.}
+\item{tree_props}{A K x \code{ncol(w)} matrix containing the proportion of trees
+in the ensemble splitting on each variable in \code{w} at each iteration.}
+\item{avg_tree_depth}{A length K vector of the average depth of all trees in
+the ensemble at each iteration.}
+\item{avg_num_nodes}{A length K vector of the average number of nodes in all
+trees in the ensemble at each iteration.}
+\item{avg_num_leaves}{A length K vector of the average number of leaves in
+all trees in the ensemble at each iteration.}
+\item{time}{A length K vector of the time taken to complete each iteration.}
+\item{logLik}{A length K vector of the log-likelihood computed at each iteration.}
+\item{pWAIC, lppd, WAIC}{The WAIC penalty, log posterior predictive density,
+and WAIC (Widely Applicable Information Criteria) computed as:
+\code{WAIC = -2*lppd +2*pWAIC}}
+\item{...}{(the list also includes the parameters provided when fitting
+the function.)}
+}
 \description{
-Estimate Heterogeneous Effects with Conditional Logistic Regression
+Estimate heterogeneous effects of a single exposure/treatment covariate with
+conditional logistic regression.
 }
 \examples{
 'INSERT EXAMPLE HERE'

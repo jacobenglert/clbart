@@ -6,7 +6,11 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of clbart is to …
+This package implements the CL-BART model, a method that models
+heterogeneous effects for a single predictor in a conditional logistic
+regression. Specifically, it is designed to be used with case-crossover
+designs, where each observed case is matched to itself a number of
+times.
 
 ## Installation
 
@@ -24,28 +28,25 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(clbart)
-## basic example code
+library(dplyr)
+
+library(survival)
+clogit(y ~ x + as.matrix(w * z) + strata(s))
+
+summary(cco)
+
+w <- select(cco, starts_with('W'))
+x <- select(cco, starts_with('X'))
+y <- cco$Y
+z <- cco$Z
+s <- cco$Strata
+
+fit <- clbart(w = w, x = x, y = y, z = z, stratum = s, 
+              num_trees = 20, seed = 1, iter = 5000, warmup = 2500, thin = 5,
+              alpha_sigma = 1, beta_sigma = 1)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this. You could also
-use GitHub Actions to re-render `README.Rmd` every time you push. An
-example workflow can be found here:
-<https://github.com/r-lib/actions/tree/v1/examples>.
+<!-- You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/v1/examples>. -->
 
 You can also embed plots, for example:
 
@@ -53,3 +54,147 @@ You can also embed plots, for example:
 
 In that case, don’t forget to commit and push the resulting figure
 files, so they display on GitHub and CRAN.
+
+``` r
+library(tidyverse)
+
+# Visualize Trace Plots for Fixed Effects
+fit$beta |>
+  data.frame() |>
+  mutate(Iteration = row_number()) |>
+  pivot_longer(cols = -Iteration, names_to = 'Parameter', values_to = 'Value') |>
+  ggplot(aes(x = Iteration, y = Value)) +
+  geom_line() +
+  geom_hline(yintercept = 0, lty = 2) +
+  facet_wrap(~Parameter) +
+  theme_bw()
+
+# Summarize Fixed Effects with Credible Intervals
+fit$beta |>
+  data.frame() |>
+  mutate(Iteration = row_number()) |>
+  pivot_longer(cols = -Iteration, names_to = 'Parameter', values_to = 'Value') |>
+  summarise(post_mean = mean(Value),
+            post_l95 = quantile(Value, 0.025),
+            post_u95 = quantile(Value, 0.925),
+            .by = Parameter)
+
+# Visualize Model Diagnostics
+fit[c('tree_acc_rate','beta_acc_rate','time','logLik')] |>
+  bind_cols() |>
+  mutate(Iteration = row_number()) |>
+  pivot_longer(cols = -Iteration, names_to = 'Parameter', values_to = 'Value') |>
+  ggplot(aes(x = Iteration, y = Value)) +
+  geom_line() +
+  facet_wrap(~Parameter, scales = 'free') +
+  theme_bw()
+
+# Visualize Tree Complexity
+fit[c('avg_tree_depth','avg_num_nodes','avg_num_leaves')] |>
+  bind_cols() |>
+  mutate(Iteration = row_number()) |>
+  pivot_longer(cols = -Iteration, names_to = 'Parameter', values_to = 'Value') |>
+  ggplot(aes(x = Iteration, y = Value, color = Parameter)) +
+  geom_line() +
+  theme_bw()
+
+# Visualize Tree Splitting Variables
+fit$split_props |>
+  data.frame() |> 
+  mutate(Iteration = row_number()) |>
+  pivot_longer(cols = -Iteration, names_to = 'Covariate', values_to = 'Value') |>
+  summarise(post_mean = mean(Value),
+            post_l95 = quantile(Value, 0.025),
+            post_u95 = quantile(Value, 0.975),
+            .by = Covariate) |>
+  ggplot(aes(x = Covariate, y = post_mean)) +
+  geom_col(fill = 'white', color = 'black') +
+  geom_errorbar(aes(ymin = post_l95, ymax = post_u95), width = 0.5) +
+  theme_bw()
+# 
+# fit$split_props |>
+#   data.frame() |> 
+#   mutate(Iteration = row_number()) |>
+#   pivot_longer(cols = -Iteration, names_to = 'Covariate', values_to = 'Value') |>
+#   ggplot(aes(x = Iteration, y = Covariate, fill = Value)) +
+#   geom_tile() +
+#   theme_bw()
+
+# Calculate CLORs (Conditional Log Odds Ratios)
+w_unique <- w[c(T,F,F,F,F),]
+clor <- lapply(fit$forests, \(f) predict_forest(forest = f, new_data = w_unique)) |>
+  do.call(what = rbind) |>
+  data.frame() |>
+  mutate(Iteration = row_number())
+
+# Visualize 10 CLORs
+clor |> 
+  pivot_longer(cols = -Iteration, names_to = 'ID', values_to = 'CLOR') |>
+  group_by(ID) |>
+  group_split() |>
+  sample(20) |>
+  bind_rows() |>
+  ggplot(aes(x = Iteration, y = CLOR, color = ID)) +
+  geom_line(show.legend = FALSE) +
+  geom_hline(yintercept = 0, lty = 2) +
+  facet_wrap(~ID) +
+  theme_bw()
+
+# Visualize ACLOR (Average Conditional Log Odds Ratio)
+clor |> 
+  pivot_longer(cols = -Iteration, names_to = 'ID', values_to = 'CLOR') |>
+  summarise(ACLOR = mean(CLOR), .by = Iteration) |>
+  ggplot(aes(x = Iteration, y = ACLOR)) +
+  geom_line() +
+  theme_bw()
+
+# Calculate Marginal Partial ACLORs
+library(parallel) # to speed up computation
+pACLOR <- mclapply(colnames(w), \(x) comp_pd(model = fit, model_data = w_unique, vars = x, resolution = 20), mc.cores = 6)
+pACLOR_clean <- pACLOR |>
+  bind_rows() |>
+  pivot_longer(cols = all_of(colnames(w)), names_to = 'Variable', values_to = 'Value') |>
+  filter(!is.na(Value))
+
+# Visualize Marginal pACLORs
+pACLOR_clean |>
+  summarise(pACLOR = mean(pd),
+            lower = quantile(pd, .05),
+            upper = quantile(pd, .95),
+            .by = c(Variable, Value)) |>
+  ggplot(aes(x = Value, y = pACLOR)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5) +
+  geom_hline(yintercept = 0, lty = 2) +
+  facet_wrap(~Variable, scales = 'free_x') +
+  theme_bw()
+
+
+# Partial Dependence Function
+comp_pd <- function(model = NULL, model_data = NULL, new_data = NULL, vars = NULL, resolution = 5){
+  
+  if(is.null(new_data)){
+    pd_groups <- sapply(vars, \(v) seq(min(model_data[v]), max(model_data[v]), length.out = resolution), simplify = FALSE) |>
+      expand.grid()
+    
+    #pd_groups <- seq(min(model_data[vars]), max(model_data[vars]), length.out = 5)
+    new_data <- model_data[!(names(model_data) %in% vars)] |>
+      dplyr::group_by(across(everything())) |>
+      dplyr::summarise(n = n(), .groups = 'drop') |>
+      merge(pd_groups)
+  }
+  
+  pd <- model$forests |>
+    lapply(\(f){
+      cbind(new_data, preds = predict_forest(f, new_data = new_data[!(names(new_data) == 'n')])) |>
+        dplyr::group_by(across(all_of(vars))) |>
+        dplyr::summarise(pd = weighted.mean(preds, n), .groups = 'drop')
+    }) |>
+    do.call(what = rbind)
+  
+  pd$Iteration <- rep(1:(nrow(pd) / nrow(pd_groups)), each = nrow(pd_groups))
+  
+  return(pd)
+  
+}
+```

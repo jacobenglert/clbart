@@ -1,5 +1,10 @@
 #' Estimate Heterogeneous Effects with Conditional Logistic Regression
 #'
+#' @description
+#' Estimate heterogeneous effects of a single exposure/treatment covariate with
+#' conditional logistic regression.
+#'
+#'
 #' @param w A data frame of potential effect moderators.
 #' @param x A data frame of effect confounders.
 #' @param y A numeric vector of 1's and 0's corresponding to the outcome
@@ -30,6 +35,43 @@
 #' in Chipman et al. (2010).
 #' @param alpha_sigma,beta_sigma Shape and scale parameters for the inverse
 #' gamma prior on the terminal node variance.
+#'
+#' @returns `clbart` returns a list of elements of the posterior distribution
+#' generated during the fitting process. The number of posterior samples is
+#' K = `(iter - warmup) / thin`.
+#'  \item{beta}{A K x `ncol(x)` matrix.}
+#'  \item{sigma2_beta}{A length K vector (typically one value, since sigma2_beta
+#'   is only updated during the warmup period).}
+#'  \item{beta_acc_rate}{A length K vector of the cumulative M-H acceptance rate
+#'  for the entire `beta` vector.}
+#'  \item{forests}{A length K list of lists. Each internal list represents an
+#'  individual tree within the ensemble, represented by a list of nodes within
+#'  within that tree for the given iteration. Each node is represented as a list
+#'  containing: `leaf` (indicates whether the node is a leaf node), `split_rule`
+#'  (indicating the variable and cut-point defining the node), and `mu`
+#'  (the prediction for the node).}
+#'  \item{tree_acc_rate}{A length K vector of the proportion of tree proposals
+#'  accepted out of `num_trees` within each iteration.}
+#'  \item{sigma2_mu}{A length K vector of the variance parameter placed on the
+#'  Normal leaf node prior.}
+#'  \item{split_props}{A K x `ncol(w)` matrix containing the distribution of
+#'  all splits in the ensemble across the variables in `w` at each iteration.}
+#'  \item{tree_props}{A K x `ncol(w)` matrix containing the proportion of trees
+#'  in the ensemble splitting on each variable in `w` at each iteration.}
+#'  \item{avg_tree_depth}{A length K vector of the average depth of all trees in
+#'  the ensemble at each iteration.}
+#'  \item{avg_num_nodes}{A length K vector of the average number of nodes in all
+#'  trees in the ensemble at each iteration.}
+#'  \item{avg_num_leaves}{A length K vector of the average number of leaves in
+#'  all trees in the ensemble at each iteration.}
+#'  \item{time}{A length K vector of the time taken to complete each iteration.}
+#'  \item{logLik}{A length K vector of the log-likelihood computed at each iteration.}
+#'  \item{pWAIC, lppd, WAIC}{The WAIC penalty, log posterior predictive density,
+#'  and WAIC (Widely Applicable Information Criteria) computed as:
+#'  `WAIC = -2*lppd +2*pWAIC`}
+#'  \item{...}{(the list also includes the parameters provided when fitting
+#'  the function.)}
+#'
 #'
 #' @examples
 #' 'INSERT EXAMPLE HERE'

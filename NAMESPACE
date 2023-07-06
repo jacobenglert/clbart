@@ -2,4 +2,3 @@
 
 export(clbart)
 export(predict_forest)
-export(str_split_one)

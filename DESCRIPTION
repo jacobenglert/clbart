@@ -17,11 +17,12 @@ Imports:
     matrixStats,
     mvtnorm,
     progress,
-    stats,
-    stringr
+    stats
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 URL: https://github.com/jacobenglert/clbart
 BugReports: https://github.com/jacobenglert/clbart/issues
-
+Depends: 
+    R (>= 2.10)
+LazyData: true
