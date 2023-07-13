@@ -66,8 +66,10 @@ comp_mv <- function(m_start = 0, y, z, stratum, sc1 = 0, lambda = 0, sigma2_mu, 
 
       m <- stats::optimize(fn, lower = m - abs(3 * m), upper = m + abs(3 * m), maximum = TRUE)$maximum
 
-      grd <- comp_grd(y, z, sc1 + z * (m + lambda), stratum, max_win, na_locs) - (m / sigma2_mu)
-      I <- comp_fisher(y, z, sc1 + z * (m + lambda), stratum, max_win, na_locs)  + (1 / sigma2_mu)
+      break
+      # grd <- comp_grd(y, z, sc1 + z * (m + lambda), stratum, max_win, na_locs) - (m / sigma2_mu)
+      # I <- comp_fisher(y, z, sc1 + z * (m + lambda), stratum, max_win, na_locs)  + (1 / sigma2_mu)
+
     }
     i <- i + 1
   }

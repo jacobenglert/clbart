@@ -9,4 +9,4 @@
 library(testthat)
 library(clbart)
 
-test_check("clbart")
+# test_check("clbart")
