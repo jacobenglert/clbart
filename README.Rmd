@@ -1,0 +1,37 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# clbart
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of clbart is to estimate heterogeneous exposure effects of a primary exposure in a case-crossover design.
+
+## Installation
+
+You can install the development version of clbart from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("jacobenglert/clbart")
+```
+
+## Example
+
+```{r example}
+library(clbart)
+# Coming soon
+```
