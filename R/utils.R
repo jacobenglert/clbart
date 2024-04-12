@@ -30,18 +30,18 @@ p_grow <- function(tree, default = 1 / 3) return(ifelse(nrow(tree) == 1, 1, defa
 p_prune <- function(tree, default = 1 / 3) return(ifelse(nrow(tree) == 1, 0, default))
 
 p_moves <- function (tree, default = c(p_grow = 0.3, p_prune = 0.3, p_change = 0.4)) {
-  
+
   # Check if tree can grow
   if (any(unlist(tree$goodvars[tree$var == -1]))) can_grow <- TRUE else can_grow <- FALSE
-  
+
   # Check if tree can be pruned
   if (nrow(tree) > 1) can_prune <- TRUE else can_prune <- FALSE
-  
+
   # If tree can be pruned it can also likely be changed (might rarely cause an issue)
   if (can_prune) can_change <- TRUE else can_change <- FALSE
-  
+
   probs <- default * c(can_grow, can_prune, can_change)
-  
+
   return (probs / sum(probs))
 }
 
@@ -69,14 +69,30 @@ log_sum_exp <- function(log_values) {
   return(max_log_value + log(sum_exp))
 }
 
+logs_to_s <- function(log_probs) {
+
+  # Step 1: Subtract the maximum log probability
+  max_log_prob <- max(log_probs)
+  shifted_probs <- log_probs - max_log_prob
+
+  # Step 2: Exponentiate
+  probs <- exp(shifted_probs)
+
+  # Step 3: Normalize
+  probs <- probs / sum(probs)
+
+  return(probs)
+
+}
+
 # rdirichlet <- function(n, alpha) {
 #   k <- length(alpha)
 #   dirichlet_samples <- matrix(nrow = n, ncol = k)
-#   
+#
 #   for (i in 1:n) {
 #     gamma_samples <- rgamma(k, shape = alpha, rate = 1)
 #     dirichlet_samples[i, ] <- gamma_samples / sum(gamma_samples)
 #   }
-#   
+#
 #   return(dirichlet_samples)
 # }

@@ -240,7 +240,7 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
     if (k > opts$num_burn / 2) {
       if (opts$update_s) {
         hypers$logs <- update_s(forest, hypers)
-        hypers$s <- exp(hypers$logs)
+        hypers$s <- logs_to_s(hypers$logs)
       }
       if (opts$update_alpha) hypers$alpha <- update_alpha(hypers)
     }
@@ -269,7 +269,7 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
       # Update other parameters
       if (opts$update_s) {
         hypers$logs <- update_s(forest, hypers)
-        hypers$s <- exp(hypers$logs)
+        hypers$s <- logs_to_s(hypers$logs)
       }
       if (opts$update_alpha) hypers$alpha <- update_alpha(hypers)
       if (opts$update_mu_mu) hypers$mu_mu <- update_mu_mu(forest, hypers)
