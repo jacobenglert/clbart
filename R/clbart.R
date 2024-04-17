@@ -130,6 +130,8 @@ Opts <- function (num_burn = 2500, num_thin = 1, num_save = 2500,
 #' # TBD
 clbart <- function (w, x, y, z, strata, hypers, opts) {
 
+  start <- Sys.time()
+
   set.seed(opts$seed)
 
   if (is.null(hypers$s)) hypers$s <- rep(1 / ncol(w), ncol(w))
@@ -317,6 +319,8 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
   post$pWAIC <- sum(ll2 / opts$num_save - (ll / opts$num_save)^2)
   post$lppd <- sum(log(ell / opts$num_save))
   post$WAIC <- -2 * post$lppd + 2 * post$pWAIC
+
+  post$time <- as.numeric(Sys.time() - start)
 
   return (post)
 }
