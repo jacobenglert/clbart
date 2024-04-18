@@ -322,6 +322,8 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
 
   post$time <- as.numeric(Sys.time() - start)
 
+  class(post) <- 'clbart'
+
   return (post)
 }
 
