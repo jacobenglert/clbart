@@ -6,8 +6,6 @@
 #' @param power Parameter penalizing tree depth in the branching process prior.
 #' @param mu_mu Mean parameter in terminal node prior.
 #' @param sigma_mu Standard deviation parameter in terminal node prior.
-#' @param k2_shape Shape parameter for inverse-gamma update of terminal node prior variance (DO NOT USE).
-#' @param k2_scale Scale parameter for inverse-gamma update of terminal node prior variance (DO NOT USE).
 #' @param s Vector of splitting probabilities for predictors.
 #' @param alpha Positive constant controlling the sparsity level.
 #' @param alpha_scale Scale of the prior for \code{alpha}; if not provided, defaults to the number of predictors.
@@ -19,8 +17,6 @@
 #' @export
 Hypers <- function (num_tree = 50, k = 0.5, base = 0.95, power = 2,
                     mu_mu = 0, sigma_mu = NULL,
-                    k2_shape = 1.0, k2_scale = 0.25,
-                    # omega = NULL, tau = NULL,
                     s = NULL,
                     alpha = 1, alpha_scale = NULL,
                     alpha_shape1 = 0.5, alpha_shape2 = 1,
@@ -45,15 +41,6 @@ Hypers <- function (num_tree = 50, k = 0.5, base = 0.95, power = 2,
   out$alpha_shape1  <- alpha_shape1
   out$alpha_shape2  <- alpha_shape2
   out$sigma_beta    <- sigma_beta
-  out$k2_shape      <- k2_shape
-  out$k2_scale      <- k2_scale
-
-  # # Horseshoe
-  # tau_0_inv <- stats::rgamma(num_tree, 1, 2)
-  # out$tau <- sqrt(1 / stats::rgamma(num_tree, shape = (num_tree + 1) / 2, rate = tau_0_inv))
-  # out$sigma_mu_scale <- k / sqrt(num_tree) # scale of marginal prior
-  # out$omega <- k / sqrt(num_tree)
-  # out$sigma_mu <- out$omega * out$tau
 
   return (out)
 
@@ -196,9 +183,6 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
 
       loglik = numeric(opts$num_save),
 
-      # omega = numeric(opts$num_save),
-      # tau = matrix(NA, ncol = hypers$num_tree, nrow = opts$num_save),
-
       lambda_mean_overall = numeric(opts$num_save),
       lambda_est = numeric(nrow(w)),
 
@@ -249,8 +233,6 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
 
     if (opts$update_mu_mu) hypers$mu_mu <- update_mu_mu(forest, hypers)
     if (opts$update_sigma_mu) hypers$sigma_mu <- update_sigma_mu(forest, hypers)
-    # hypers$tau <- update_tau(forest, hypers)
-    # hypers$omega <- update_omega(forest, hypers)
 
     pb$tick()
   }
@@ -276,8 +258,6 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
       if (opts$update_alpha) hypers$alpha <- update_alpha(hypers)
       if (opts$update_mu_mu) hypers$mu_mu <- update_mu_mu(forest, hypers)
       if (opts$update_sigma_mu) hypers$sigma_mu <- update_sigma_mu(forest, hypers)
-      # hypers$tau <- update_tau(forest, hypers)
-      # hypers$omega <- update_omega(forest, hypers)
 
     }
 
@@ -293,9 +273,6 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
     post$mu_mu[k]           <- hypers$mu_mu
     post$sigma_mu[k]        <- hypers$sigma_mu
     post$sigma_beta[k]      <- hypers$sigma_beta
-
-    # post$omega[k] <- hypers$omega
-    # post$tau[k,] <- hypers$tau
 
     post$forest[[k]] <- cbind(sample = rep.int(k, nrow(forest)),
                               forest[,c('tree','node','n','var','value','loglik')])
