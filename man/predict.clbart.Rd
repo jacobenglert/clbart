@@ -4,7 +4,7 @@
 \alias{predict.clbart}
 \title{Predict Method for CL-BART Model Fits}
 \usage{
-\method{predict}{clbart}(object, newdata, type = c("bart", "con"), posterior = FALSE)
+\method{predict}{clbart}(object, newdata, type = "bart", posterior = FALSE)
 }
 \arguments{
 \item{object}{a fitted object of class \code{clbart}.}
@@ -30,5 +30,13 @@ a vector (or matrix if \code{posterior = TRUE}) of predictions from
 a fitted \code{clbart} model object.
 }
 \description{
-Predict Method for CL-BART Model Fits
+Obtain predictions from a fitted \code{clbart} model.
+}
+\examples{
+\dontrun{
+# Assuming `model` is a fitted model of class `clbart`, and `w` is a data
+# frame of modifiers of interest.
+# To obtain the posterior distribution of predictions of exposure effects:
+predict(model, list(w = w), type = 'bart', posterior = TRUE)
+}
 }

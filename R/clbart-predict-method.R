@@ -1,5 +1,9 @@
 #' Predict Method for CL-BART Model Fits
 #'
+#' @description
+#' Obtain predictions from a fitted \code{clbart} model.
+#'
+#'
 #' @param object a fitted object of class \code{clbart}.
 #' @param newdata optionally, a list of data frames to be used for prediction.
 #' When \code{type = "con"} is requested, this list must include a data frame of
@@ -18,17 +22,24 @@
 #' @return a vector (or matrix if \code{posterior = TRUE}) of predictions from
 #' a fitted \code{clbart} model object.
 #' @export
-#'
+
+#' @examples
+#' \dontrun{
+#' # Assuming `model` is a fitted model of class `clbart`, and `w` is a data
+#' # frame of modifiers of interest.
+#' # To obtain the posterior distribution of predictions of exposure effects:
+#' predict(model, list(w = w), type = 'bart', posterior = TRUE)
+#' }
 predict.clbart <- function (object,
                             newdata,
-                            type = c('bart','con'),
+                            type = "bart",
                             posterior = FALSE) {
 
   if (type == 'bart') {
     if (is.null(newdata$w)) stop("w data frame must be specified in newdata.")
-    if (is.null(fit$forest)) stop("object is missing forest component.")
-    if (ncol(fit$split_counts) == ncol(newdata$w)) {
-      if (any(colnames(fit$split_counts) != colnames(newdata$w))) {
+    if (is.null(object$forest)) stop("object is missing forest component.")
+    if (ncol(object$split_counts) == ncol(newdata$w)) {
+      if (any(colnames(object$split_counts) != colnames(newdata$w))) {
         stop("Moderating covariates in newdata$w do not match those used in fitted clbart model.")
       }
     } else {
@@ -37,8 +48,8 @@ predict.clbart <- function (object,
     predictions <- get_forest_posterior_predictions(object$forest, newdata$w)
   } else if (type == 'con') {
     if (is.null(newdata$x)) stop("x data frame must be specified in newdata.")
-    if (ncol(fit$beta) == ncol(newdata$x)) {
-      if (any(colnames(fit$beta) != colnames(newdata$x))) {
+    if (ncol(object$beta) == ncol(newdata$x)) {
+      if (any(colnames(object$beta) != colnames(newdata$x))) {
         stop("Confounding covariates in newdata$x do not match those in object$beta.")
       }
     } else {
