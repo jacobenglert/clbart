@@ -11,8 +11,6 @@ Hypers(
   power = 2,
   mu_mu = 0,
   sigma_mu = NULL,
-  k2_shape = 1,
-  k2_scale = 0.25,
   s = NULL,
   alpha = 1,
   alpha_scale = NULL,
@@ -33,10 +31,6 @@ Hypers(
 \item{mu_mu}{Mean parameter in terminal node prior.}
 
 \item{sigma_mu}{Standard deviation parameter in terminal node prior.}
-
-\item{k2_shape}{Shape parameter for inverse-gamma update of terminal node prior variance (DO NOT USE).}
-
-\item{k2_scale}{Scale parameter for inverse-gamma update of terminal node prior variance (DO NOT USE).}
 
 \item{s}{Vector of splitting probabilities for predictors.}
 
