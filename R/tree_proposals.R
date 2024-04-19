@@ -39,8 +39,8 @@ grow <- function (tree, w, y, z, s, offset, hypers) {
   prop_tree <- curr_tree
 
   # Sample a splitting rule
-  s <- hypers$s * unlist(l$goodvars)
-  l$var <- sample(1:ncol(w), size = 1, prob = s / sum(s))
+  split.probs <- hypers$s * unlist(l$goodvars)
+  l$var <- sample(1:ncol(w), size = 1, prob = split.probs / sum(split.probs))
   w.sub <- w[l.ind,l$var]
   l$value <- sample(w.sub[w.sub < max(w.sub)], size = 1) # sample(w.sub[floor(runif(1) * l$n)])
 
@@ -308,8 +308,8 @@ change <- function(tree, w, y, z, s, offset, hypers){
   prop_tree <- curr_tree
 
   # Sample a valid splitting rule and update selected NOG node
-  s <- hypers$s * unlist(b$goodvars)
-  b$var <- sample(1:ncol(w), size = 1, prob = s / sum(s))
+  split.probs <- hypers$s * unlist(b$goodvars)
+  b$var <- sample(1:ncol(w), size = 1, prob = split.probs / sum(split.probs))
   w.sub <- w[b.ind,b$var]
   b$value <- sample(w.sub[w.sub < max(w.sub)], size = 1)
 
