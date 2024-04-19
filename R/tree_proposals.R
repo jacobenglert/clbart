@@ -40,6 +40,7 @@ grow <- function (tree, w, y, z, s, offset, hypers) {
 
   # Sample a splitting rule
   split.probs <- hypers$s * unlist(l$goodvars)
+  if (sum(split.probs) == 0) return (curr_tree)
   l$var <- sample(1:ncol(w), size = 1, prob = split.probs / sum(split.probs))
   w.sub <- w[l.ind,l$var]
   l$value <- sample(w.sub[w.sub < max(w.sub)], size = 1) # sample(w.sub[floor(runif(1) * l$n)])
@@ -309,6 +310,7 @@ change <- function(tree, w, y, z, s, offset, hypers){
 
   # Sample a valid splitting rule and update selected NOG node
   split.probs <- hypers$s * unlist(b$goodvars)
+  if (sum(split.probs) == 0) return (curr_tree)
   b$var <- sample(1:ncol(w), size = 1, prob = split.probs / sum(split.probs))
   w.sub <- w[b.ind,b$var]
   b$value <- sample(w.sub[w.sub < max(w.sub)], size = 1)
