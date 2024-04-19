@@ -297,7 +297,7 @@ clbart <- function (w, x, y, z, strata, hypers, opts) {
   post$lppd <- sum(log(ell / opts$num_save))
   post$WAIC <- -2 * post$lppd + 2 * post$pWAIC
 
-  post$time <- as.numeric(Sys.time() - start)
+  post$time <- as.numeric(difftime(Sys.time(), start, units = 'min'))
 
   class(post) <- 'clbart'
 
