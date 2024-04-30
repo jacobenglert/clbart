@@ -1,0 +1,8 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{Estimating Heterogeneous Exposure Effects using CL-BART}
+
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{clbart.pdf}
+\end{document}
+

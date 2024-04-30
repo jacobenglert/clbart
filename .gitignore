@@ -7,3 +7,9 @@ src/*.so
 src/*.dll
 
 .DS_Store
+inst/doc
+/doc/
+/Meta/
+
+vignettes/clbart.Rmd
+vignettes/materials/

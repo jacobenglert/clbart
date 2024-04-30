@@ -17,3 +17,7 @@ Imports:
     progress,
     Rcpp,
     stats
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

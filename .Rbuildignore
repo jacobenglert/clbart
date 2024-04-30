@@ -2,3 +2,7 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
+^doc$
+^Meta$
+^vignettes/clbart\.Rmd$
+^vignettes/materials$
