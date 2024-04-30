@@ -24,4 +24,4 @@ devtools::install_github("jacobenglert/clbart")
 
 For a detailed example of how to use the package and fit `clbart`
 models, view the package vignette
-[here](https://github.com/jacobenglert/clbart/vignettes/clbart.pdf).
+[here](https://github.com/jacobenglert/clbart/blob/main/vignettes/clbart.pdf).
