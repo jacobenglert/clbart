@@ -1,6 +1,6 @@
 Package: clbart
 Title: Conditional Logistic Regression with Bayesian Additive Regression Trees
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     c(person("Jacob", "Englert", email = "jacob.englert@emory.edu", role = c("aut", "cre")))
 Description: Estimate heterogeneous treatment/exposures effects in case-crossover studies using conditional logistic regression and Bayesian additive regression trees.
