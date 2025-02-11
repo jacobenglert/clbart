@@ -4,11 +4,11 @@
 # clbart
 
 The goal of `clbart` is to estimate heterogeneous effects of a primary
-exposure in a case-only design. Specifically, this method is appropriate
-for data which have been constructed using the design, such that only
-one case exists within each strata. The effect of the primary exposure
-is modeled as a function of time-invariant covariates using Bayesian
-additive regression trees.
+exposure in a scenario where only cases are observed. Specifically, this
+method is appropriate for data which have been constructed using the
+design, such that only one case exists within each strata. The effect of
+the primary exposure is modeled as a function of time-invariant
+covariates using Bayesian additive regression trees.
 
 ## Installation
 
