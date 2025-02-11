@@ -1,5 +1,3 @@
-Rcpp::sourceCpp(here::here('src','update_sigma.cpp'))
-
 # Update terminal node prior mean
 update_mu_mu <- function (forest, hypers) {
   mu_mu_var_pre <- 100^2
