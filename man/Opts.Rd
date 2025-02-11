@@ -25,7 +25,7 @@ Opts(
 
 \item{num_save}{Number of posterior samples to save; in total, \code{num_burn + num_save * num_thin} iterations are run.}
 
-\item{num_chains}{Number of chains to run; values greater than 1 only work with mc_clbart.}
+\item{num_chains}{Number of chains to run (currently only 1 chain is possible).}
 
 \item{update_sigma_mu}{If \code{TRUE}, \code{sigma_mu} is updated, with a half-Cauchy prior.}
 

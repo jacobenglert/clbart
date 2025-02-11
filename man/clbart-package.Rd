@@ -3,7 +3,6 @@
 \docType{package}
 \name{clbart-package}
 \alias{clbart-package}
-\alias{_PACKAGE}
 \title{clbart: Conditional Logistic Regression with Bayesian Additive Regression Trees}
 \description{
 Estimate heterogeneous treatment/exposures effects in case-crossover studies using conditional logistic regression and Bayesian additive regression trees.

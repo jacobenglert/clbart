@@ -51,7 +51,7 @@ Hypers <- function (num_tree = 50, k = 0.5, base = 0.95, power = 2,
 #' @param num_burn Number of burn-in iterations for the chain.
 #' @param num_thin Post burn-in thinning interval for the chain.
 #' @param num_save Number of posterior samples to save; in total, \code{num_burn + num_save * num_thin} iterations are run.
-#' @param num_chains Number of chains to run; values greater than 1 only work with mc_clbart.
+#' @param num_chains Number of chains to run (currently only 1 chain is possible).
 #' @param update_sigma_mu If \code{TRUE}, \code{sigma_mu} is updated, with a half-Cauchy prior.
 #' @param update_mu_mu If \code{TRUE}, \code{mu_mu} is updated, with a noninformative conjugate normal prior (typically not recommended).
 #' @param update_s If \code{TRUE}, \code{s} is updated using the Dirichlet prior \eqn{s \sim D(\alpha / P, \ldots, \alpha / P)} where \eqn{P} is the number of covariates used in the BART component.
